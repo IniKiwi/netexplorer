@@ -114,34 +114,34 @@ class Logger;
 
 class NetworkTask{
     private:
-    std::vector<NetworkTaskThread*> threads;
-    std::vector<Ipv4Range> tasks;
-    Logger* logger;
-    size_t current_task = 0;
-    Ipv4Addr current_ipv4;
-    size_t max_requests = 0;
-    size_t requests = 0;
-    size_t popular_idx = 0;
-    uint32_t timeout = 500000;
-    bool ended = false;
-    size_t threads_num = 5;
+    std::vector<NetworkTaskThread*> m_threads;
+    std::vector<Ipv4Range> m_tasks;
+    Logger* m_logger;
+    size_t m_current_task = 0;
+    Ipv4Addr m_current_ipv4;
+    size_t m_max_requests = 0;
+    size_t m_requests = 0;
+    size_t m_popular_idx = 0;
+    uint32_t m_timeout = 500000;
+    bool m_ended = false;
+    size_t m_threads_num = 5;
 
     std::mutex lock;
     public:
-    NetworkTask(Logger* _logger, std::string taskdata): logger(_logger){
+    NetworkTask(Logger* _logger, std::string taskdata): m_logger(_logger){
         decode(taskdata);
     }
     void decode(std::string taskdata);
 
     bool is_ended(){
-        return ended;
+        return m_ended;
     }
 
-    Logger* get_logger(){return logger;}
-    uint32_t get_timeout(){return timeout;}
-    void set_timeout(uint32_t _timeout){timeout = _timeout;}
-    void set_threads_num(uint32_t _threads){threads_num = _threads;}
-    void set_max_requests(uint32_t _requests){max_requests = _requests;}
+    Logger* get_logger(){return m_logger;}
+    uint32_t get_timeout(){return m_timeout;}
+    void set_timeout(uint32_t _timeout){m_timeout = _timeout;}
+    void set_threads_num(uint32_t _threads){m_threads_num = _threads;}
+    void set_max_requests(uint32_t _requests){m_max_requests = _requests;}
 
     Ipv4Addr get_next_ipv4();
 

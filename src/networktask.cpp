@@ -88,55 +88,55 @@ void NetworkTask::decode(std::string taskdata){
                 }
             }
         }
-        tasks.push_back(result);
+        m_tasks.push_back(result);
     }
 }
 
 Ipv4Addr NetworkTask::get_next_ipv4(){
     lock.lock();
-    if(requests == 0 && current_task == 0){
-        current_ipv4 = tasks[0].ip[0];
-        current_ipv4.calculate_random();
+    if(m_requests == 0 && m_current_task == 0){
+        m_current_ipv4 = m_tasks[0].ip[0];
+        m_current_ipv4.calculate_random();
     }
-    if(current_ipv4.port_mode == AddrEntryMode::MODE_RANDOM){
-        current_ipv4.calculate_random();
+    if(m_current_ipv4.port_mode == AddrEntryMode::MODE_RANDOM){
+        m_current_ipv4.calculate_random();
     }
-    else if(current_ipv4.port_mode == AddrEntryMode::MODE_RANGE){
-        if(current_ipv4.port < tasks[current_task].ip[1].port){
-            current_ipv4.port++;
+    else if(m_current_ipv4.port_mode == AddrEntryMode::MODE_RANGE){
+        if(m_current_ipv4.port < m_tasks[m_current_task].ip[1].port){
+            m_current_ipv4.port++;
             goto _exit;
         }
         else{
-            current_ipv4.port = tasks[current_task].ip[0].port;
+            m_current_ipv4.port = m_tasks[m_current_task].ip[0].port;
         }
         bool is_rand = false;
         for(int sub=3;sub >= 0;sub--){
-            if(current_ipv4.ip[sub].mode == AddrEntryMode::MODE_RANDOM){
+            if(m_current_ipv4.ip[sub].mode == AddrEntryMode::MODE_RANDOM){
                 is_rand = true;
-                current_ipv4.ip[sub].i = std::rand()%UINT8_MAX;
+                m_current_ipv4.ip[sub].i = std::rand()%UINT8_MAX;
             }
-            if(current_ipv4.ip[sub].mode == AddrEntryMode::MODE_RANGE){
+            if(m_current_ipv4.ip[sub].mode == AddrEntryMode::MODE_RANGE){
                 if(is_rand == false){
-                    if(current_ipv4.ip[sub].i < tasks[current_task].ip[1].ip[sub].i){
-                        current_ipv4.ip[sub].i++;
+                    if(m_current_ipv4.ip[sub].i < m_tasks[m_current_task].ip[1].ip[sub].i){
+                        m_current_ipv4.ip[sub].i++;
                         goto _exit;
                         //break;
                     }
                     else{
                         if(sub == 0){
                             //logger->log("end of task: "+std::to_string(current_task)+"/"+std::to_string(tasks.size()));
-                            current_task++;
-                            if(tasks.size() > current_task){
-                                current_ipv4 = tasks[current_task].ip[0];
-                                current_ipv4.calculate_random();
+                            m_current_task++;
+                            if(m_tasks.size() > m_current_task){
+                                m_current_ipv4 = m_tasks[m_current_task].ip[0];
+                                m_current_ipv4.calculate_random();
                                 goto _exit;
                             }
                             else{
-                                ended = true;
+                                m_ended = true;
                                 goto _exit;
                             }
                         }
-                        current_ipv4.ip[sub].i = tasks[current_task].ip[0].ip[sub].i;
+                        m_current_ipv4.ip[sub].i = m_tasks[m_current_task].ip[0].ip[sub].i;
                     }
                 }
             }
@@ -162,37 +162,37 @@ Ipv4Addr NetworkTask::get_next_ipv4(){
         }
     }*/
     _exit:
-    requests++;
-    if(max_requests == 0){
+    m_requests++;
+    if(m_max_requests == 0){
 
     }
-    else if(requests > max_requests){
-        ended = true;
+    else if(m_requests > m_max_requests){
+        m_ended = true;
     }
-    Ipv4Addr r = current_ipv4;
+    Ipv4Addr r = m_current_ipv4;
     lock.unlock();
     return r;
 }
 
 void NetworkTask::run(){
-    logger->log(std::string("\e[32m\e[1m")+PRODUCT_STR);
-    logger->log("task list:");
-    for(int t=0;t<tasks.size();t++){
-        if(tasks[t].ip[0].is_random()){
-            logger->log("\trandom...");
+    m_logger->log(std::string("\e[32m\e[1m")+PRODUCT_STR);
+    m_logger->log("task list:");
+    for(int t=0;t<m_tasks.size();t++){
+        if(m_tasks[t].ip[0].is_random()){
+            m_logger->log("\trandom...");
             break;
         }
         else{
-            logger->log("\t"+tasks[t].ip[0].to_string()+" / "+tasks[t].ip[1].to_string());
+            m_logger->log("\t"+m_tasks[t].ip[0].to_string()+" / "+m_tasks[t].ip[1].to_string());
         }
     }
-    for(int i=0;i<threads_num;i++){
+    for(int i=0;i<m_threads_num;i++){
         NetworkTaskThread* t = new NetworkTaskThread(this);
-        threads.push_back(t);
+        m_threads.push_back(t);
         t->start();
     }
-    for(int i=0;i<threads_num;i++){
-        threads.at(i)->wait();
+    for(int i=0;i<m_threads_num;i++){
+        m_threads.at(i)->wait();
     }
 }
 

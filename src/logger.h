@@ -17,23 +17,23 @@ enum RequestStatus{
 
 class Logger{
     private:
-    std::mutex lock;
-    bool use_stdout;
-    bool hide_fail;
-    std::ofstream logfile;
+    std::mutex m_lock;
+    bool m_use_stdout;
+    bool m_hide_fail;
+    std::ofstream m_logfile;
 
     public:
-    Logger(bool _use_stdout, std::string output): use_stdout(_use_stdout) {
-        logfile.open(output, std::ios::out | std::ios::app);
+    Logger(bool _use_stdout, std::string output): m_use_stdout(_use_stdout) {
+        m_logfile.open(output, std::ios::out | std::ios::app);
     }
     ~Logger(){
-        if(logfile.is_open()){
-            logfile.close();
+        if(m_logfile.is_open()){
+            m_logfile.close();
         }
     }
 
     std::string get_time_str();
-    void set_hide_fail(bool v){hide_fail = v;}
+    void set_hide_fail(bool v){m_hide_fail = v;}
     void log(std::string msg);
     void log_request(int status, Ipv4Addr addr, std::string msg);
 };

@@ -21,21 +21,21 @@ std::string Logger::get_time_str(){
 }
 
 void Logger::log(std::string msg){
-    lock.lock();
-    if(use_stdout){
+    m_lock.lock();
+    if(m_use_stdout){
         printf("\e[90m%s -\e[39m %s\e[0m\n", get_time_str().c_str(), msg.c_str());
     }
-    if(logfile.is_open()){
-        logfile << get_time_str();
-        logfile << " \t";
-        logfile << msg;
-        logfile << "\n";
+    if(m_logfile.is_open()){
+        m_logfile << get_time_str();
+        m_logfile << " \t";
+        m_logfile << msg;
+        m_logfile << "\n";
     }
-    lock.unlock();
+    m_lock.unlock();
 }
 
 void Logger::log_request(int status, Ipv4Addr addr, std::string msg){
-    if(status == RequestStatus::FAIL && hide_fail == true) return;
+    if(status == RequestStatus::FAIL && m_hide_fail == true) return;
     char* buffer = new char[1000+msg.size()];
     const char* st;
     if(status == RequestStatus::OK) st = MSG_OK;
