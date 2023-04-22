@@ -109,13 +109,18 @@ typedef struct Ipv4Range{
     Ipv4Addr ip[2];
 } Ipv4Range;
 
+typedef struct Task{
+    Ipv4Range range;
+    std::string hostname;
+} Task;
+
 class NetworkTaskThread;
 class Logger;
 
 class NetworkTask{
     private:
     std::vector<NetworkTaskThread*> m_threads;
-    std::vector<Ipv4Range> m_tasks;
+    std::vector<Task> m_tasks;
     Logger* m_logger;
     size_t m_current_task = 0;
     Ipv4Addr m_current_ipv4;
@@ -125,13 +130,18 @@ class NetworkTask{
     uint32_t m_timeout = 500000;
     bool m_ended = false;
     size_t m_threads_num = 5;
+    bool m_ok = false;
 
     std::mutex lock;
     public:
     NetworkTask(Logger* _logger, std::string taskdata): m_logger(_logger){
-        decode(taskdata);
+        if(decode(taskdata) >= 0){
+            m_ok = true;
+        }
     }
-    void decode(std::string taskdata);
+    int decode(std::string taskdata);
+    int decode_ipv4(std::string rawdata, Ipv4Range base);
+    int decode_domain(std::string rawdata, Ipv4Range base);
 
     bool is_ended(){
         return m_ended;
