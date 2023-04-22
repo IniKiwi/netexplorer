@@ -84,7 +84,7 @@ int NetworkTask::decode(std::string taskdata){
             r = decode_domain(sections[0], result);
         }
         if(r == -1){
-            return -1;
+            continue;
         }
     }
     return 0;
@@ -149,7 +149,7 @@ int NetworkTask::decode_domain(std::string rawdata, Task base){
         return -1;
     }
     m_logger->log(std::string("\tname: \t\t")+remotehost->h_name);
-    std::string aliases = "\taliases: \t\t";
+    std::string aliases = "\taliases: \t";
     for(int i=0;remotehost->h_aliases[i] != NULL;i++){
         aliases += remotehost->h_aliases[i];
     }
@@ -175,6 +175,18 @@ int NetworkTask::decode_domain(std::string rawdata, Task base){
         }
     }
     m_logger->log(addrs);
+
+    std::string reverse = "\treverse: \t";
+    for(int i=0;i < addr_s;i++){
+        struct hostent *hp;
+        if ((hp = gethostbyaddr((const void *)addr_list[i], sizeof(struct in_addr), AF_INET)) != NULL) {
+            reverse += hp->h_name;
+            if(i != addr_s-1){
+                addrs += ", ";
+            }
+        }
+    }
+    m_logger->log(reverse);
 }
 
 Ipv4Addr NetworkTask::get_next_ipv4(){
