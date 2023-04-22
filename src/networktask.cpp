@@ -20,39 +20,57 @@ int NetworkTask::decode(std::string taskdata){
         logger->log(task_list[t]+"-"+task_list[t]);
     }*/
     for(size_t task = 0;task<task_list.size();task++){
-        Ipv4Range result;
-        std::vector<std::string> sections = split(task_list.at(task), ':');
+        Task result;
+        result.hostname = "";
+        //Ipv4Range result;
+        std::vector<std::string> protocol = split_l(task_list.at(task), "://");
+        //m_logger->log(std::to_string(protocol.size()));
+        //m_logger->log(protocol[0]);
+        //m_logger->log(protocol[1]);
+        std::vector<std::string> sections;
+        if(protocol.size()==1){
+            sections = split(protocol[0], ':');
+            result.protocol = "tcp-unknow";
+        }
+        else if(protocol.size()==2){
+            sections = split(protocol[1], ':');
+            result.protocol = protocol[0];
+        }
+        else{
+            return -1;
+        }
+        
         if(sections.size()==2){
             std::vector<std::string> port_ranges = split(sections[1], '-');
             if(port_ranges.size()==1){
                 if(sections[1] == TAG_POPULAR){
-                result.ip[0].port_mode = AddrEntryMode::MODE_POPULAR;
+                result.range.ip[0].port_mode = AddrEntryMode::MODE_POPULAR;
                 }
                 else if(sections[1] == TAG_RANDOM){
-                    result.ip[0].port_mode = AddrEntryMode::MODE_RANDOM;
+                    result.range.ip[0].port_mode = AddrEntryMode::MODE_RANDOM;
                 }
                 else if(sections[1] == TAG_ALL){
-                    result.ip[0].port_mode = AddrEntryMode::MODE_RANGE;
-                    result.ip[0].port = 1;
-                    result.ip[1].port = UINT16_MAX;
+                    result.range.ip[0].port_mode = AddrEntryMode::MODE_RANGE;
+                    result.range.ip[0].port = 1;
+                    result.range.ip[1].port = UINT16_MAX;
                 }
                 else{
-                    result.ip[0].port_mode = AddrEntryMode::MODE_RANGE;
-                    result.ip[0].port = std::stoi(sections[1]);
-                    result.ip[1].port = std::stoi(sections[1]);
+                    result.range.ip[0].port_mode = AddrEntryMode::MODE_RANGE;
+                    result.range.ip[0].port = std::stoi(sections[1]);
+                    result.range.ip[1].port = std::stoi(sections[1]);
                 }
             }
             else{
-                result.ip[0].port_mode = AddrEntryMode::MODE_RANGE;
-                result.ip[0].port = std::stoi(port_ranges[0]);
-                result.ip[1].port = std::stoi(port_ranges[1]);
+                result.range.ip[0].port_mode = AddrEntryMode::MODE_RANGE;
+                result.range.ip[0].port = std::stoi(port_ranges[0]);
+                result.range.ip[1].port = std::stoi(port_ranges[1]);
             }
 
         }
         else{
-            result.ip[0].port_mode = AddrEntryMode::MODE_RANGE;
-            result.ip[0].port = 1;
-            result.ip[1].port = 1000;
+            result.range.ip[0].port_mode = AddrEntryMode::MODE_RANGE;
+            result.range.ip[0].port = 1;
+            result.range.ip[1].port = 1000;
         }
 
         int r = -1;
@@ -72,15 +90,15 @@ int NetworkTask::decode(std::string taskdata){
     return 0;
 }
 
-int NetworkTask::decode_ipv4(std::string rawdata, Ipv4Range base){
-    Ipv4Range result = base;
+int NetworkTask::decode_ipv4(std::string rawdata, Task base){
+    Task result = base;
     std::vector<std::string> sub_ips = split(rawdata, '.');
     if(sub_ips.size()==1){
         if(sub_ips[0] == TAG_RANDOM){
-            result.ip[0].ip[0].mode = AddrEntryMode::MODE_RANDOM;
-            result.ip[0].ip[1].mode = AddrEntryMode::MODE_RANDOM;
-            result.ip[0].ip[2].mode = AddrEntryMode::MODE_RANDOM;
-            result.ip[0].ip[3].mode = AddrEntryMode::MODE_RANDOM;
+            result.range.ip[0].ip[0].mode = AddrEntryMode::MODE_RANDOM;
+            result.range.ip[0].ip[1].mode = AddrEntryMode::MODE_RANDOM;
+            result.range.ip[0].ip[2].mode = AddrEntryMode::MODE_RANDOM;
+            result.range.ip[0].ip[3].mode = AddrEntryMode::MODE_RANDOM;
         }
         else{
             return -1;
@@ -91,23 +109,23 @@ int NetworkTask::decode_ipv4(std::string rawdata, Ipv4Range base){
             std::vector<std::string> sub_ranges = split(sub_ips[sub], '-');
             if(sub_ranges.size()==1){
                 if(sub_ranges[0] == TAG_RANDOM){
-                    result.ip[0].ip[sub].mode = AddrEntryMode::MODE_RANDOM;
+                    result.range.ip[0].ip[sub].mode = AddrEntryMode::MODE_RANDOM;
                 }
                 else if(sub_ranges[0] == TAG_ALL){
-                    result.ip[0].ip[sub].mode = AddrEntryMode::MODE_RANGE;
-                    result.ip[0].ip[sub].i = 0;
-                    result.ip[1].ip[sub].i = UINT8_MAX;
+                    result.range.ip[0].ip[sub].mode = AddrEntryMode::MODE_RANGE;
+                    result.range.ip[0].ip[sub].i = 0;
+                    result.range.ip[1].ip[sub].i = UINT8_MAX;
                 }
                 else{
-                    result.ip[0].ip[sub].mode = AddrEntryMode::MODE_RANGE;
-                    result.ip[0].ip[sub].i = std::stoi(sub_ranges[0]);
-                    result.ip[1].ip[sub].i = std::stoi(sub_ranges[0]);
+                    result.range.ip[0].ip[sub].mode = AddrEntryMode::MODE_RANGE;
+                    result.range.ip[0].ip[sub].i = std::stoi(sub_ranges[0]);
+                    result.range.ip[1].ip[sub].i = std::stoi(sub_ranges[0]);
                 }
             }
             else if(sub_ranges.size()==2){
-                result.ip[0].ip[sub].mode = AddrEntryMode::MODE_RANGE;
-                result.ip[0].ip[sub].i = std::stoi(sub_ranges[0]);
-                result.ip[1].ip[sub].i = std::stoi(sub_ranges[1]);
+                result.range.ip[0].ip[sub].mode = AddrEntryMode::MODE_RANGE;
+                result.range.ip[0].ip[sub].i = std::stoi(sub_ranges[0]);
+                result.range.ip[1].ip[sub].i = std::stoi(sub_ranges[1]);
             }
             else{
                 return -1;
@@ -117,15 +135,13 @@ int NetworkTask::decode_ipv4(std::string rawdata, Ipv4Range base){
     else{
         return -1;
     }
-    m_tasks.push_back((Task){
-        .range = result,
-        .hostname = "",
-    });
+    m_tasks.push_back(result);
 }
 
-int NetworkTask::decode_domain(std::string rawdata, Ipv4Range base){
+int NetworkTask::decode_domain(std::string rawdata, Task base){
     struct hostent* remotehost;
     m_logger->log("\e[1msearching host data for \""+rawdata+"\"...");
+    base.hostname = rawdata;
     remotehost = gethostbyname(rawdata.c_str());
 
     if (remotehost == NULL){
@@ -253,7 +269,7 @@ void NetworkTask::run(){
             break;
         }
         else{
-            m_logger->log("\t"+m_tasks[t].range.ip[0].to_string()+" / "+m_tasks[t].range.ip[1].to_string());
+            m_logger->log("\t"+m_tasks[t].protocol+"://"+m_tasks[t].range.ip[0].to_string()+" / "+m_tasks[t].range.ip[1].to_string());
         }
     }
     for(int i=0;i<m_threads_num;i++){

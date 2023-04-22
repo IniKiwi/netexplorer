@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <iostream>
 #include <stdexcept>
 
 std::vector<std::string> split(const std::string &str, char delim) {
@@ -27,4 +28,21 @@ std::string string_format( const std::string& format, Args ... args )
     std::unique_ptr<char[]> buf( new char[ size ] );
     std::snprintf( buf.get(), size, format.c_str(), args ... );
     return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
+}
+std::vector<std::string> split_l(const std::string str, std::string dlm){
+    std::string s = str;
+    std::string delimiter = dlm;
+    std::vector<std::string> ret;
+
+    size_t pos = 0;
+    std::string token;
+    while ((pos = s.find(delimiter)) != std::string::npos) {
+        token = s.substr(0, pos);
+        ret.push_back(token);
+        //std::cout << token << std::endl;
+        s.erase(0, pos + delimiter.length());
+    }
+    //std::cout << s << std::endl;
+    ret.push_back(s);
+    return ret;
 }

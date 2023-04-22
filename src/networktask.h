@@ -112,6 +112,7 @@ typedef struct Ipv4Range{
 typedef struct Task{
     Ipv4Range range;
     std::string hostname;
+    std::string protocol;
 } Task;
 
 class NetworkTaskThread;
@@ -140,8 +141,8 @@ class NetworkTask{
         }
     }
     int decode(std::string taskdata);
-    int decode_ipv4(std::string rawdata, Ipv4Range base);
-    int decode_domain(std::string rawdata, Ipv4Range base);
+    int decode_ipv4(std::string rawdata, Task base);
+    int decode_domain(std::string rawdata, Task base);
 
     bool is_ended(){
         return m_ended;
