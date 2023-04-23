@@ -19,6 +19,8 @@ enum Tasks{
 
 int task;
 int task_argc;
+std::string rawoutput_filename = "";
+std::string log_filename = "";
 
 
 int main(int argc, char *argv[]){
@@ -49,6 +51,10 @@ int main(int argc, char *argv[]){
         if(std::string(argv[a]) == "--hide-fail"){
             hide_fail = true;
         }
+         if(std::string(argv[a]) == "--raw-output"){
+            if(argc < a+1){exit(1);}
+            rawoutput_filename = argv[a+1];
+        }
     }
 
     logger->set_hide_fail(hide_fail);
@@ -57,7 +63,9 @@ int main(int argc, char *argv[]){
         task->set_timeout(timeout);
         task->set_threads_num(threads);
         task->set_max_requests(requests);
+        task->set_raw_output_filename(rawoutput_filename);
         task->run();
+        task->write_raw_results();
     }
 
     delete logger;

@@ -32,6 +32,8 @@ typedef struct Ipv4Addr{
     Ipv4Sub ip[4];
     uint16_t port;
     uint8_t port_mode;
+    std::string protocol;
+    std::string hostname;
 
     bool operator<(struct Ipv4Addr& addr){
         return (ip[0].i < addr.ip[0].i) &&
@@ -122,11 +124,14 @@ class NetworkTask{
     private:
     std::vector<NetworkTaskThread*> m_threads;
     std::vector<Task> m_tasks;
+    std::vector<std::string> m_raw_output_list;
+    std::string m_raw_output_filename = "";
     Logger* m_logger;
     size_t m_current_task = 0;
     Ipv4Addr m_current_ipv4;
     size_t m_max_requests = 0;
     size_t m_requests = 0;
+    size_t m_last_raw_write = 0;
     size_t m_popular_idx = 0;
     uint32_t m_timeout = 500000;
     bool m_ended = false;
@@ -143,6 +148,18 @@ class NetworkTask{
     int decode(std::string taskdata);
     int decode_ipv4(std::string rawdata, Task base);
     int decode_domain(std::string rawdata, Task base);
+
+    void push_raw_result(Ipv4Addr addr){
+        std::string h = addr.hostname;
+        if(addr.hostname == ""){
+            h = addr.to_string_ip();
+        }
+        m_raw_output_list.push_back(addr.protocol+"://"+h+std::string(":")+std::to_string(addr.port));
+    }
+    void set_raw_output_filename(std::string filename){
+        m_raw_output_filename = filename;
+    }
+    void write_raw_results();
 
     bool is_ended(){
         return m_ended;

@@ -31,10 +31,12 @@ int NetworkTask::decode(std::string taskdata){
         if(protocol.size()==1){
             sections = split(protocol[0], ':');
             result.protocol = "tcp-unknow";
+            result.range.ip[0].protocol = "tcp-unknow";
         }
         else if(protocol.size()==2){
             sections = split(protocol[1], ':');
             result.protocol = protocol[0];
+            result.range.ip[0].protocol = protocol[0];
         }
         else{
             return -1;
@@ -142,6 +144,7 @@ int NetworkTask::decode_domain(std::string rawdata, Task base){
     struct hostent* remotehost;
     m_logger->log("\e[1msearching host data for \""+rawdata+"\"...");
     base.hostname = rawdata;
+    base.range.ip->hostname = rawdata;
     remotehost = gethostbyname(rawdata.c_str());
 
     if (remotehost == NULL){
@@ -265,10 +268,30 @@ Ipv4Addr NetworkTask::get_next_ipv4(){
     }
     else if(m_requests > m_max_requests){
         m_ended = true;
+        write_raw_results();
+    }
+    if(m_last_raw_write+1000 < m_requests){
+        write_raw_results();
     }
     Ipv4Addr r = m_current_ipv4;
     lock.unlock();
     return r;
+}
+
+void NetworkTask::write_raw_results(){
+    if(m_raw_output_filename == "") return;
+    std::ofstream file;
+    file.open(m_raw_output_filename, std::ios::out | std::ios::app);
+    if(file.is_open()){
+        size_t s = m_raw_output_list.size();
+        for(size_t i=0;i<s;i++){
+            file << m_raw_output_list[i];
+            file << ";";
+        }
+        file.close();
+    }
+    m_raw_output_list.clear();
+    m_last_raw_write = m_requests;
 }
 
 void NetworkTask::run(){
@@ -323,6 +346,7 @@ void NetworkTaskThread::run(){
         if(connect(sockfd, (struct sockaddr*)&server, sizeof(server)) != -1){
             std::string msg;
             task->get_logger()->log_request(RequestStatus::OK, addr, msg);
+            task->push_raw_result(addr);
         }
         else{
             task->get_logger()->log_request(RequestStatus::FAIL, addr, "");

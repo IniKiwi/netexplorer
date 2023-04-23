@@ -1,7 +1,7 @@
 # IniKiwi's netexplorer
 icence: gpl-3.0
 ## use   
-`inikiwi-netexplorer [-r <requests>] [-j <threads>] [-t <timeout>] [--hide-fail] <task>`
+`inikiwi-netexplorer [-r <requests>] [-j <threads>] [-t <timeout>] [--hide-fail] [--raw-output <file>] <task>`
 ### tasks
 - `explore [<protocol>://]{<ip>, hostname}[:<port>]` scan ports of a given ip or hostname. for each ports prints the requests status: `FAIL` or `OK`. explore task is multithreaded.
 
@@ -21,6 +21,7 @@ icence: gpl-3.0
 - `-j <threads>` number of threads used for explore tasks. a thread can do one request at a time.
 - `-t <timeout>` set timeout for requests. if the timeout is reached the requests is set to `FAIL`.
 - `--hide-fail` hides failed requests (timeout). show only requests with `OK` and `SKIPPED` status.
+- `--raw-output` write results with `OK` status in a text file as a raw task list,  compatible with `explore` task.
 
 ## build
 ### debian based 
