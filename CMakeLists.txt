@@ -44,6 +44,8 @@ set(
     src/util.cpp
     src/networktask.cpp
     src/logger.cpp
+    src/protocol/http.cpp
+    src/protocol/tcp.cpp
 )
 
 add_executable(inikiwi-netexplorer ${SRCS} ${LUA_SRC} ${HEADERS})

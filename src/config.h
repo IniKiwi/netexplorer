@@ -11,3 +11,6 @@
 #define PRODUCT_NAME "IniKiwi's netexplorer"
 
 #define PRODUCT_STR  PRODUCT_NAME " " VERSION_STR
+
+#define BUFFER_SIZE 500000
+#define MIN_BUFFER_SIZE 10000

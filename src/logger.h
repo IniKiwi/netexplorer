@@ -36,5 +36,7 @@ class Logger{
     std::string get_time_str();
     void set_hide_fail(bool v){m_hide_fail = v;}
     void log(std::string msg);
+    void log_unsafe(std::string msg);
     void log_request(int status, Ipv4Addr addr, std::string msg);
+    void log_request(int status, Ipv4Addr addr, std::string msg, std::vector<std::string> lines);
 };

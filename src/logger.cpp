@@ -20,8 +20,7 @@ std::string Logger::get_time_str(){
     return  ret;
 }
 
-void Logger::log(std::string msg){
-    m_lock.lock();
+void Logger::log_unsafe(std::string msg){
     if(m_use_stdout){
         printf("\e[90m%s -\e[39m %s\e[0m\n", get_time_str().c_str(), msg.c_str());
     }
@@ -31,17 +30,31 @@ void Logger::log(std::string msg){
         m_logfile << msg;
         m_logfile << "\n";
     }
+}
+
+void Logger::log(std::string msg){
+    m_lock.lock();
+    log_unsafe(msg);
     m_lock.unlock();
 }
 
 void Logger::log_request(int status, Ipv4Addr addr, std::string msg){
+    log_request(status, addr, msg, std::vector<std::string>());
+}
+
+void Logger::log_request(int status, Ipv4Addr addr, std::string msg, std::vector<std::string> lines){
     if(status == RequestStatus::FAIL && m_hide_fail == true) return;
     char* buffer = new char[1000+msg.size()];
     const char* st;
     if(status == RequestStatus::OK) st = MSG_OK;
     if(status == RequestStatus::FAIL) st = MSG_FAIL;
     if(status == RequestStatus::SKIPPED) st = MSG_SKIPPED;
-    sprintf(buffer,"try connect to %s:%d -> %s %s", addr.to_string_ip().c_str(),addr.port, st, msg.c_str());
-    log(buffer);
+    sprintf(buffer,"try connect to %s://%s:%d -> %s %s", addr.protocol.c_str(), addr.to_string_ip().c_str(),addr.port, st, msg.c_str());
+    m_lock.lock();
+    log_unsafe(buffer);
     delete buffer;
+    for(int i=0;i<lines.size();i++){
+        log_unsafe("\t"+lines[i]);
+    }
+    m_lock.unlock();
 }

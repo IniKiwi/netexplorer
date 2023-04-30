@@ -1,9 +1,3 @@
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-
 #include <cstring>
 #include <cstdio>
 #include <unistd.h>
@@ -11,6 +5,9 @@
 #include "logger.h"
 #include "networktask.h"
 #include "config.h"
+
+#include "protocol/tcp.h"
+#include "protocol/http.h"
 
 int NetworkTask::decode(std::string taskdata){
     std::vector<std::string> task_list = split(taskdata, ';');
@@ -327,31 +324,15 @@ void NetworkTaskThread::run(){
             break;
         }
         Ipv4Addr addr = task->get_next_ipv4();
-        std::string ip_str = addr.to_string_ip();
-
-        int sockfd = socket(AF_INET,SOCK_STREAM,0);
-        struct timeval timeout;      
-        timeout.tv_sec = 0;
-        timeout.tv_usec = task->get_timeout();
-        
-        setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
-        setsockopt (sockfd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
-
-        struct sockaddr_in server;
-        std::memset(&server,0,sizeof(struct sockaddr_in));
-        server.sin_addr.s_addr = inet_addr(addr.to_string_ip().c_str());
-        server.sin_family = AF_INET;
-        server.sin_port = htons(addr.port);
-
-        if(connect(sockfd, (struct sockaddr*)&server, sizeof(server)) != -1){
-            std::string msg;
-            task->get_logger()->log_request(RequestStatus::OK, addr, msg);
-            task->push_raw_result(addr);
+        if(addr.protocol == "http" || addr.protocol == "tcp-http"){
+            http_action(addr, "/", task);
+        }
+        else if(addr.protocol == "tcp"){
+            tcp_action(addr, task);
         }
         else{
-            task->get_logger()->log_request(RequestStatus::FAIL, addr, "");
+            tcp_action(addr, task);
         }
-        close(sockfd);
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }

@@ -1,4 +1,11 @@
 #pragma once
+
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+
 #include <cstdint>
 #include <cstddef>
 #include <vector>
@@ -103,6 +110,13 @@ typedef struct Ipv4Addr{
         std::string result = to_string_ip();
         result += ":";
         result += std::to_string(port);
+        return result;
+    }
+    std::string get_host(){
+        std::string result = hostname;
+        if(result == ""){
+            result = to_string_ip();
+        }
         return result;
     }
 } Ipv4Addr;
