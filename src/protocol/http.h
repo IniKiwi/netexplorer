@@ -22,6 +22,8 @@ class HttpRequestResult{
         std::free(m_raw_data);
     }
 
+    char* get_content_ptr();
+    size_t get_content_size();
     std::string get_status();
     std::string get_version();
     std::string get_full_header();

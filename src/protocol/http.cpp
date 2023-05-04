@@ -4,9 +4,12 @@
 #include "../logger.h"
 #include "../exceptions.h"
 
+#include "../parser/html.h"
+
 #include <cstring>
 #include <cstdlib>
 #include <memory>
+#include <sstream>
 
 HttpRequestResult* http_get(int sockfd, Ipv4Addr addr, std::string path){
     char* req_buffer = (char*)std::malloc(MIN_BUFFER_SIZE);
@@ -75,6 +78,12 @@ int http_action(Ipv4Addr addr, std::string path, NetworkTask* task){
         lines.push_back("\e[1mserver:\e[0m "+result->get_header("Server"));
         lines.push_back("\e[1mcontent-type:\e[0m "+result->get_header("Content-Type"));
         lines.push_back("\e[1mcontent-length:\e[0m "+result->get_header("Content-Length"));
+        if(result->get_header("Content-Type").find("text/html") != std::string::npos){
+            std::stringstream stream("");
+            size_t s;
+            stream >> s;
+            lines.push_back("\e[1mhtml-title:\e[0m "+html_get(result->get_content_ptr(), 0, result->get_content_size(), "html.head.title", 0));
+        }
         task->get_logger()->log_request(RequestStatus::OK,addr, result->get_status()+" \e[33mhttp://"+addr.get_host()+":"+std::to_string(addr.port)+path, lines);
         delete result;
         return RequestStatus::OK;
@@ -139,4 +148,13 @@ std::string HttpRequestResult::get_version(){
     std::string result;
     result.append(m_raw_data, i-m_raw_data);
     return result;
+}
+
+char* HttpRequestResult::get_content_ptr(){
+    if(!is_http()) throw InvalidProtocolError("");
+    return strstr(m_raw_data, "\r\n\r\n")+4;
+}
+
+size_t HttpRequestResult::get_content_size(){
+    return m_size - (get_content_ptr() - m_raw_data);
 }

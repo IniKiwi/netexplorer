@@ -46,6 +46,7 @@ set(
     src/logger.cpp
     src/protocol/http.cpp
     src/protocol/tcp.cpp
+    src/parser/html.cpp
 )
 
 add_executable(inikiwi-netexplorer ${SRCS} ${LUA_SRC} ${HEADERS})
