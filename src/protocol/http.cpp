@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <memory>
 #include <sstream>
+#include <unistd.h>
 
 HttpRequestResult* http_get(int sockfd, Ipv4Addr addr, std::string path){
     char* req_buffer = (char*)std::malloc(MIN_BUFFER_SIZE);
@@ -64,6 +65,7 @@ int http_action(Ipv4Addr addr, std::string path, NetworkTask* task){
     int sockfd = tcp_connect(addr, task->get_timeout());
     if(sockfd == -1){
         task->get_logger()->log_request(RequestStatus::FAIL,addr, "");
+        close(sockfd);
         return RequestStatus::FAIL;
     }
     try{
@@ -71,6 +73,7 @@ int http_action(Ipv4Addr addr, std::string path, NetworkTask* task){
         if(!result->is_http()){
             task->get_logger()->log_request(RequestStatus::FAIL,addr, "");
             delete result;
+            close(sockfd);
             return RequestStatus::FAIL;
         }
         task->push_raw_result(addr);
@@ -86,6 +89,7 @@ int http_action(Ipv4Addr addr, std::string path, NetworkTask* task){
         }
         task->get_logger()->log_request(RequestStatus::OK,addr, result->get_status()+" \e[33mhttp://"+addr.get_host()+":"+std::to_string(addr.port)+path, lines);
         delete result;
+        close(sockfd);
         return RequestStatus::OK;
     }
     catch(NetworkError e){
@@ -94,6 +98,7 @@ int http_action(Ipv4Addr addr, std::string path, NetworkTask* task){
     catch(DataException e){
         task->get_logger()->log_request(RequestStatus::OK,addr, e.what());
     }
+    close(sockfd);
     return RequestStatus::FAIL;
 }
 
