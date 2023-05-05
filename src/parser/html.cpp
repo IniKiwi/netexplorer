@@ -81,7 +81,7 @@ std::string html_get(const char* data, size_t pos, size_t size, std::string name
         std::string token = html_next_token(data, i, size);
         if(token == ""){return "";}
         else if(token[0] == '!'){}
-        else if(token[0] == '/'){
+        else if(token[0] == '/' && stack.size()> 0){
             if(path[path.size()-1] == token.substr(1)){
                 if(path == stack){
                     if(found == index){
@@ -91,7 +91,7 @@ std::string html_get(const char* data, size_t pos, size_t size, std::string name
                 }
             }
             for(size_t s = stack.size()-1; s>=0;s--){
-                if(stack.size() == 0){break;}
+                if(stack.size()<s){break;}
                 if(stack[s] == token.substr(1)){
                     for(size_t c=0;c<stack.size()-s;c++){
                         if(stack.size()>0){
