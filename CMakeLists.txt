@@ -50,5 +50,5 @@ set(
 )
 
 add_executable(inikiwi-netexplorer ${SRCS} ${LUA_SRC} ${HEADERS})
-target_link_libraries(inikiwi-netexplorer PRIVATE sqlite3 pthread )
+target_link_libraries(inikiwi-netexplorer PRIVATE )
 set(CMAKE_BUILD_TYPE Relase)

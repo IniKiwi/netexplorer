@@ -27,7 +27,7 @@ icence: gpl-3.0
 ## build
 ### debian based 
 ```bash
-sudo apt-get install build-essential cmake libpthread-stubs0-dev libsqlite3-dev
+sudo apt-get install build-essential cmake
 mkdir build && cd build
 cmake ..
 make
