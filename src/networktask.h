@@ -154,12 +154,14 @@ class NetworkTask{
 
     std::mutex lock;
     public:
+    NetworkTask(Logger* _logger): m_logger(_logger){}
     NetworkTask(Logger* _logger, std::string taskdata): m_logger(_logger){
         if(decode(taskdata) >= 0){
             m_ok = true;
         }
     }
     int decode(std::string taskdata);
+    int decode_file(std::string rawdata);
     int decode_ipv4(std::string rawdata, Task base);
     int decode_domain(std::string rawdata, Task base);
 
