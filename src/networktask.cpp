@@ -316,16 +316,6 @@ void NetworkTask::write_raw_results(){
 void NetworkTask::run(){
     if(m_ok == false) return;
     m_logger->log(std::string("\e[32m\e[1m")+PRODUCT_STR);
-    m_logger->log("task list:");
-    for(int t=0;t<m_tasks.size();t++){
-        if(m_tasks[t].range.ip[0].is_random()){
-            m_logger->log("\trandom...");
-            break;
-        }
-        else{
-            m_logger->log("\t"+m_tasks[t].protocol+"://"+m_tasks[t].range.ip[0].to_string()+" / "+m_tasks[t].range.ip[1].to_string());
-        }
-    }
     for(int i=0;i<m_threads_num;i++){
         NetworkTaskThread* t = new NetworkTaskThread(this);
         m_threads.push_back(t);
