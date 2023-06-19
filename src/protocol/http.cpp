@@ -14,7 +14,7 @@
 
 HttpRequestResult* http_get(int sockfd, Ipv4Addr addr, std::string path){
     char* req_buffer = (char*)std::malloc(MIN_BUFFER_SIZE);
-    std::snprintf(req_buffer, MIN_BUFFER_SIZE, "GET %s HTTP/1.1\r\nHost: %s\r\n\r\n", path.c_str(), addr.get_host());
+    std::snprintf(req_buffer, MIN_BUFFER_SIZE, "GET %s HTTP/1.1\r\nHost: %s\r\n\r\n", path.c_str(), addr.get_host().c_str());
 
     size_t http_req_s = std::strlen(req_buffer);
     //char* req_buffer_ptr = req_buffer;
