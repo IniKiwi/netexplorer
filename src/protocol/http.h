@@ -33,3 +33,4 @@ class HttpRequestResult{
 
 HttpRequestResult* http_get(int sockfd, Ipv4Addr addr, std::string path);
 int http_action(Ipv4Addr addr, std::string path, NetworkTask* task);
+int http_log(Ipv4Addr addr, std::string path, NetworkTask* task, HttpRequestResult* result);

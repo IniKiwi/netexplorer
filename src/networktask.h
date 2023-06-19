@@ -107,7 +107,7 @@ typedef struct Ipv4Addr{
         return result;
     }
     std::string to_string(){
-        std::string result = to_string_ip();
+        std::string result = get_host();
         result += ":";
         result += std::to_string(port);
         return result;

@@ -9,6 +9,7 @@
 
 #include "protocol/tcp.h"
 #include "protocol/http.h"
+#include "protocol/https.h"
 
 int NetworkTask::decode(std::string taskdata){
     std::vector<std::string> task_list = split(taskdata, ';');
@@ -338,6 +339,9 @@ void NetworkTaskThread::run(){
         Ipv4Addr addr = task->get_next_ipv4();
         if(addr.protocol == "http" || addr.protocol == "tcp-http"){
             http_action(addr, "/", task);
+        }
+        else if(addr.protocol == "https" || addr.protocol == "tcp-https"){
+            https_action(addr, "/", task);
         }
         else if(addr.protocol == "tcp"){
             tcp_action(addr, task);

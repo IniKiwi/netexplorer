@@ -76,18 +76,7 @@ int http_action(Ipv4Addr addr, std::string path, NetworkTask* task){
             close(sockfd);
             return RequestStatus::FAIL;
         }
-        task->push_raw_result(addr);
-        std::vector<std::string> lines;
-        lines.push_back("\e[1mserver:\e[0m "+result->get_header("Server"));
-        lines.push_back("\e[1mcontent-type:\e[0m "+result->get_header("Content-Type"));
-        lines.push_back("\e[1mcontent-length:\e[0m "+result->get_header("Content-Length"));
-        if(result->get_header("Content-Type").find("text/html") != std::string::npos){
-            std::stringstream stream("");
-            size_t s;
-            stream >> s;
-            lines.push_back("\e[1mhtml-title:\e[0m "+html_get(result->get_content_ptr(), 0, result->get_content_size(), "html.head.title", 0));
-        }
-        task->get_logger()->log_request(RequestStatus::OK,addr, result->get_status()+" \e[33mhttp://"+addr.get_host()+":"+std::to_string(addr.port)+path, lines);
+        http_log(addr, path, task, result);
         delete result;
         close(sockfd);
         return RequestStatus::OK;
@@ -100,6 +89,26 @@ int http_action(Ipv4Addr addr, std::string path, NetworkTask* task){
     }
     close(sockfd);
     return RequestStatus::FAIL;
+}
+
+int http_log(Ipv4Addr addr, std::string path, NetworkTask* task, HttpRequestResult* result){
+    if(!result->is_http()){
+        task->get_logger()->log_request(RequestStatus::FAIL,addr, "");
+        return RequestStatus::FAIL;
+    }
+    task->push_raw_result(addr);
+    std::vector<std::string> lines;
+    lines.push_back("\e[1mserver:\e[0m "+result->get_header("Server"));
+    lines.push_back("\e[1mcontent-type:\e[0m "+result->get_header("Content-Type"));
+    lines.push_back("\e[1mcontent-length:\e[0m "+result->get_header("Content-Length"));
+    if(result->get_header("Content-Type").find("text/html") != std::string::npos){
+        std::stringstream stream("");
+        size_t s;
+        stream >> s;
+        lines.push_back("\e[1mhtml-title:\e[0m "+html_get(result->get_content_ptr(), 0, result->get_content_size(), "html.head.title", 0));
+    }
+    task->get_logger()->log_request(RequestStatus::OK,addr, result->get_status()+" \e[33m"+addr.protocol+"://"+addr.get_host()+":"+std::to_string(addr.port)+path, lines);
+    return RequestStatus::OK;
 }
 
 bool HttpRequestResult::is_http(){

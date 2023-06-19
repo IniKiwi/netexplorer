@@ -46,9 +46,11 @@ set(
     src/logger.cpp
     src/protocol/http.cpp
     src/protocol/tcp.cpp
+    src/protocol/https.cpp
+    src/protocol/tls.cpp
     src/parser/html.cpp
 )
 
 add_executable(inikiwi-netexplorer ${SRCS} ${LUA_SRC} ${HEADERS})
-target_link_libraries(inikiwi-netexplorer PRIVATE )
+target_link_libraries(inikiwi-netexplorer PRIVATE ssl crypto)
 set(CMAKE_BUILD_TYPE Relase)
