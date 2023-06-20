@@ -10,6 +10,7 @@
 #include "protocol/tcp.h"
 #include "protocol/http.h"
 #include "protocol/https.h"
+#include "protocol/ftp.h"
 
 int NetworkTask::decode(std::string taskdata){
     std::vector<std::string> task_list = split(taskdata, ';');
@@ -342,6 +343,9 @@ void NetworkTaskThread::run(){
         }
         else if(addr.protocol == "https" || addr.protocol == "tcp-https"){
             https_action(addr, "/", task);
+        }
+        else if(addr.protocol == "ftp" || addr.protocol == "tcp-ftp"){
+            ftp_action(addr, task);
         }
         else if(addr.protocol == "tcp"){
             tcp_action(addr, task);

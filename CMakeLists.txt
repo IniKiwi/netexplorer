@@ -48,6 +48,7 @@ set(
     src/protocol/tcp.cpp
     src/protocol/https.cpp
     src/protocol/tls.cpp
+    src/protocol/ftp.cpp
     src/parser/html.cpp
 )
 
