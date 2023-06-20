@@ -49,6 +49,7 @@ void Logger::log_request(int status, Ipv4Addr addr, std::string msg, std::vector
     if(status == RequestStatus::OK) st = MSG_OK;
     if(status == RequestStatus::FAIL) st = MSG_FAIL;
     if(status == RequestStatus::SKIPPED) st = MSG_SKIPPED;
+    if(status == RequestStatus::ACCESS_DENIED) st = MSG_ACCESS_DENIED;
     sprintf(buffer,"try connect to %s://%s:%d -> %s %s", addr.protocol.c_str(), addr.to_string_ip().c_str(),addr.port, st, msg.c_str());
     m_lock.lock();
     log_unsafe(buffer);

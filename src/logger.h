@@ -4,20 +4,22 @@
 #include <fstream>
 #include <mutex>
 
-//bolt - green - OK! - normal color - normal text
-#define MSG_OK "\e[1m\e[32mOK\e[39m\e[0m"
-#define MSG_FAIL "\e[1m\e[31mFAIL\e[39m\e[0m"
-#define MSG_SKIPPED "\e[1m\e[33mSKIPPED\e[39m\e[0m"
-#define MSG_ERROR "\e[1m\e[31m"
-
 #define COLOR_RED "\e[31m"
 #define COLOR_GREEN "\e[32m"
 #define COLOR_BLUE "\e[34m"
 
+//bolt - green - OK! - normal color - normal text
+#define MSG_OK "\e[1m\e[32mOK\e[39m\e[0m"
+#define MSG_FAIL "\e[1m\e[31mFAIL\e[39m\e[0m"
+#define MSG_SKIPPED "\e[1m\e[33mSKIPPED\e[39m\e[0m"
+#define MSG_ACCESS_DENIED "\e[1m" COLOR_RED "ACCESS DENIED\e[39m\e[0m"
+#define MSG_ERROR "\e[1m\e[31m"
+
 enum RequestStatus{
     OK,
     FAIL,
-    SKIPPED
+    SKIPPED,
+    ACCESS_DENIED
 };
 
 class Logger{
