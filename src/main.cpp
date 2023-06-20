@@ -1,6 +1,8 @@
 #include "networktask.h"
 #include "logger.h"
 
+#include <sys/signal.h>
+
 const char cli_help_msg[] = "IniKiwi's netexplorer\n" \
 "the manual is on https://github.com/IniKiwi/netexplorer\n";
 
@@ -26,6 +28,7 @@ std::string log_filename = "";
 
 
 int main(int argc, char *argv[]){
+    signal(SIGPIPE, SIG_IGN);
     Logger* logger = new Logger(true,"output.log");
     for(int a=1;a<argc;a++){
         if(std::string(argv[a]) == TAG_EXPLORE){
