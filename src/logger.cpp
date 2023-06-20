@@ -54,6 +54,12 @@ void Logger::log_request(int status, Ipv4Addr addr, std::string msg, std::vector
     log_unsafe(buffer);
     delete buffer;
     for(int i=0;i<lines.size();i++){
+        size_t pos = lines[i].find(':');
+        if(pos != std::string::npos){
+            lines[i].insert(pos+1, "\e[0m");
+            lines[i].insert(0, "\e[1m");
+        }
+        lines[i] = string_replace_all(lines[i], "\n", "\n\t\t\t");
         log_unsafe("\t"+lines[i]);
     }
     m_lock.unlock();
