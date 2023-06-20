@@ -29,6 +29,7 @@ std::string log_filename = "";
 
 int main(int argc, char *argv[]){
     signal(SIGPIPE, SIG_IGN);
+    srand(time(NULL));
     Logger* logger = new Logger(true,"output.log");
     for(int a=1;a<argc;a++){
         if(std::string(argv[a]) == TAG_EXPLORE){
