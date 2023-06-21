@@ -44,6 +44,7 @@ void Logger::log_request(int status, Ipv4Addr addr, std::string msg){
 
 void Logger::log_request(int status, Ipv4Addr addr, std::string msg, std::vector<std::string> lines){
     if(status == RequestStatus::FAIL && m_hide_fail == true) return;
+    if(status == RequestStatus::ACCESS_DENIED && m_hide_access_denied == true) return;
     char* buffer = new char[1000+msg.size()];
     const char* st;
     if(status == RequestStatus::OK) st = MSG_OK;

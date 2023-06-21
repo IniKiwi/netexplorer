@@ -14,6 +14,7 @@ uint32_t timeout = 500000;
 uint32_t requests = 0;
 uint32_t threads = 5;
 bool hide_fail = false;
+bool hide_access_denied = false;
 
 enum Tasks{
     TASK_EXPLORE,
@@ -62,6 +63,9 @@ int main(int argc, char *argv[]){
         if(std::string(argv[a]) == "--hide-fail"){
             hide_fail = true;
         }
+        if(std::string(argv[a]) == "--hide-access-denied"){
+            hide_access_denied = true;
+        }
         if(std::string(argv[a]) == "--raw-output"){
             if(argc < a+1){exit(1);}
             rawoutput_filename = argv[a+1];
@@ -69,6 +73,7 @@ int main(int argc, char *argv[]){
     }
 
     logger->set_hide_fail(hide_fail);
+    logger->set_hide_access_denied(hide_access_denied);
     if(task == Tasks::TASK_EXPLORE){
         NetworkTask* task = new NetworkTask(logger, argv[task_argc+1]);
         task->set_timeout(timeout);
