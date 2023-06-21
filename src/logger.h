@@ -27,6 +27,7 @@ class Logger{
     std::mutex m_lock;
     bool m_use_stdout;
     bool m_hide_fail;
+    bool m_hide_skipped;
     bool m_hide_access_denied;
     std::ofstream m_logfile;
 
@@ -43,6 +44,7 @@ class Logger{
     std::string get_time_str();
     void set_hide_fail(bool v){m_hide_fail = v;}
     void set_hide_access_denied(bool v){m_hide_access_denied = v;}
+    void set_hide_skipped(bool v){m_hide_skipped = v;}
     void log(std::string msg);
     void log_unsafe(std::string msg);
     void log_request(int status, Ipv4Addr addr, std::string msg);

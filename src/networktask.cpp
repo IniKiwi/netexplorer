@@ -350,6 +350,9 @@ void NetworkTaskThread::run(){
         else if(addr.protocol == "tcp"){
             tcp_action(addr, task);
         }
+        else if(addr.protocol == "skip"){
+            task->get_logger()->log_request(RequestStatus::SKIPPED, addr, "");
+        }
         else{
             tcp_action(addr, task);
         }
