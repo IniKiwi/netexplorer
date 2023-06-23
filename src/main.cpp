@@ -2,6 +2,7 @@
 #include "logger.h"
 
 #include <sys/signal.h>
+#include <unistd.h>
 
 const char cli_help_msg[] = "IniKiwi's netexplorer\n" \
 "the manual is on https://github.com/IniKiwi/netexplorer\n";
