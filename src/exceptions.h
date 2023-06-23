@@ -33,3 +33,8 @@ class DataException : public BaseException {
     public:
 	DataException(const std::string &s): BaseException(s) {}
 };
+
+class FileNotFoundException : public BaseException {
+    public:
+	FileNotFoundException(const std::string &s): BaseException(s) {}
+};

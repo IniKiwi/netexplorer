@@ -44,6 +44,7 @@ set(
     src/util.cpp
     src/networktask.cpp
     src/logger.cpp
+    src/protocolmap.cpp
     src/protocol/http.cpp
     src/protocol/tcp.cpp
     src/protocol/https.cpp

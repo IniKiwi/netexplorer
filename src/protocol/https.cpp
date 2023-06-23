@@ -34,7 +34,7 @@ HttpRequestResult* https_get(SSL* ssl, Ipv4Addr addr, std::string path){
         }
         sent += bytes;
     };
-    //tls_send(ssl, req_buffer,http_req_s);
+    // tls_send(ssl, req_buffer,http_req_s);
     std::free(req_buffer);
 
     char* result_buffer = NULL;

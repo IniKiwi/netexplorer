@@ -14,6 +14,7 @@
 #include <mutex>
 
 #include "util.h"
+#include "protocolmap.h"
 
 #define TAG_POPULAR "pop"
 #define TAG_RANDOM "rand"
@@ -140,6 +141,7 @@ class NetworkTask{
     std::vector<Task> m_tasks;
     std::vector<std::string> m_raw_output_list;
     std::string m_raw_output_filename = "";
+    ProtocolMap* m_protocol_map;
     Logger* m_logger;
     size_t m_current_task = 0;
     Ipv4Addr m_current_ipv4;
@@ -154,12 +156,7 @@ class NetworkTask{
 
     std::mutex lock;
     public:
-    NetworkTask(Logger* _logger): m_logger(_logger){}
-    NetworkTask(Logger* _logger, std::string taskdata): m_logger(_logger){
-        if(decode(taskdata) >= 0){
-            m_ok = true;
-        }
-    }
+    NetworkTask(Logger* _logger, ProtocolMap* protocol_map): m_logger(_logger), m_protocol_map(protocol_map){}
     int decode(std::string taskdata);
     int decode_file(std::string rawdata);
     int decode_ipv4(std::string rawdata, Task base);
@@ -183,6 +180,7 @@ class NetworkTask{
 
     Logger* get_logger(){return m_logger;}
     uint32_t get_timeout(){return m_timeout;}
+    ProtocolMap* get_protocol_map(){return m_protocol_map;}
     void set_timeout(uint32_t _timeout){m_timeout = _timeout;}
     void set_threads_num(uint32_t _threads){m_threads_num = _threads;}
     void set_max_requests(uint32_t _requests){m_max_requests = _requests;}

@@ -1,0 +1,8 @@
+# IniKiwi's NetExplorer default protocolmap.txt
+default             tcp            # or 'skip'
+21                  ftp
+22                  tcp
+80                  http
+443                 https
+8000                http https
+8080                http https

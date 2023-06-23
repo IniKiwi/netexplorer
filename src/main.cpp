@@ -27,12 +27,14 @@ int task;
 int task_argc;
 std::string rawoutput_filename = "";
 std::string log_filename = "";
+std::string protocol_map_filename = "";
 
 
 int main(int argc, char *argv[]){
     signal(SIGPIPE, SIG_IGN);
     srand(time(NULL));
     Logger* logger = new Logger(true,"output.log");
+    ProtocolMap* protocolmap = new ProtocolMap();
     for(int a=1;a<argc;a++){
         if(std::string(argv[a]) == TAG_EXPLORE){
             if(argc < a+1){exit(1);}
@@ -74,13 +76,26 @@ int main(int argc, char *argv[]){
             if(argc < a+1){exit(1);}
             rawoutput_filename = argv[a+1];
         }
+        if(std::string(argv[a]) == "--protocol-map"){
+            if(argc < a+1){exit(1);}
+            protocol_map_filename = argv[a+1];
+        }
     }
 
     logger->set_hide_fail(hide_fail);
     logger->set_hide_access_denied(hide_access_denied);
     logger->set_hide_skipped(hide_skipped);
+    if(protocol_map_filename != ""){
+        protocolmap->import(protocol_map_filename);
+    }
+    else{
+        if(access("protocolmap.txt",F_OK) != -1){
+            protocolmap->import("protocolmap.txt");
+        }
+    }
     if(task == Tasks::TASK_EXPLORE){
-        NetworkTask* task = new NetworkTask(logger, argv[task_argc+1]);
+        NetworkTask* task = new NetworkTask(logger, protocolmap);
+        task->decode(argv[task_argc+1]);
         task->set_timeout(timeout);
         task->set_threads_num(threads);
         task->set_max_requests(requests);
@@ -89,7 +104,7 @@ int main(int argc, char *argv[]){
         task->write_raw_results();
     }
     else if(task == Tasks::TASK_EXPLORE_FILE_RAW){
-        NetworkTask* task = new NetworkTask(logger);
+        NetworkTask* task = new NetworkTask(logger, protocolmap);
         task->set_timeout(timeout);
         task->set_threads_num(threads);
         task->set_max_requests(requests);

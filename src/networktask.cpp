@@ -30,8 +30,8 @@ int NetworkTask::decode(std::string taskdata){
         std::vector<std::string> sections;
         if(protocol.size()==1){
             sections = split(protocol[0], ':');
-            result.protocol = "tcp-unknow";
-            result.range.ip[0].protocol = "tcp-unknow";
+            result.protocol = "auto";
+            result.range.ip[0].protocol = "auto";
         }
         else if(protocol.size()==2){
             sections = split(protocol[1], ':');
@@ -89,6 +89,7 @@ int NetworkTask::decode(std::string taskdata){
             continue;
         }
     }
+    m_ok = true;
     return 0;
 }
 
@@ -332,30 +333,49 @@ void NetworkTaskThread::start(){
     task_thread = new std::thread(&NetworkTaskThread::run,this);
 }
 
+int action(Ipv4Addr addr, NetworkTask* task){
+    if(addr.protocol == "http" || addr.protocol == "tcp-http"){
+        return http_action(addr, "/", task);
+    }
+    else if(addr.protocol == "https" || addr.protocol == "tcp-https"){
+        return https_action(addr, "/", task);
+    }
+    else if(addr.protocol == "ftp" || addr.protocol == "tcp-ftp"){
+        return ftp_action(addr, task);
+    }
+    else if(addr.protocol == "tcp"){
+        return tcp_action(addr, task);
+    }
+    else if(addr.protocol == "skip"){
+        task->get_logger()->log_request(RequestStatus::SKIPPED, addr, "");
+        return RequestStatus::SKIPPED;
+    }
+    else{
+        return tcp_action(addr, task);
+    }
+}
+
 void NetworkTaskThread::run(){
+    int r = 1;
     while(1){
         if(task->is_ended()){
             break;
         }
+        r = 1;
         Ipv4Addr addr = task->get_next_ipv4();
-        if(addr.protocol == "http" || addr.protocol == "tcp-http"){
-            http_action(addr, "/", task);
-        }
-        else if(addr.protocol == "https" || addr.protocol == "tcp-https"){
-            https_action(addr, "/", task);
-        }
-        else if(addr.protocol == "ftp" || addr.protocol == "tcp-ftp"){
-            ftp_action(addr, task);
-        }
-        else if(addr.protocol == "tcp"){
-            tcp_action(addr, task);
-        }
-        else if(addr.protocol == "skip"){
-            task->get_logger()->log_request(RequestStatus::SKIPPED, addr, "");
+        
+        if(addr.protocol == "auto"){
+            std::vector<std::string> proto = split(task->get_protocol_map()->get(addr.port), ' ');
+            for(int i=0; i < proto.size();i++){
+                Ipv4Addr a = addr;
+                a.protocol = proto[i];
+                r = action(a, task);
+            }
         }
         else{
-            tcp_action(addr, task);
+            r = action(addr, task);
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        
+        if(r != RequestStatus::SKIPPED)std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
