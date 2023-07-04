@@ -1,5 +1,6 @@
 #include "networktask.h"
 #include "logger.h"
+#include "lapi.h"
 
 #include <sys/signal.h>
 #include <unistd.h>
@@ -10,6 +11,7 @@ const char cli_help_msg[] = "IniKiwi's netexplorer\n" \
 #define TAG_EXPLORE "explore"
 #define TAG_EXPLORE_FILE_RAW "explore-file-raw"
 #define TAG_SEARCH "search"
+#define TAG_SCRIPT "script"
 
 uint32_t timeout = 500000;
 uint32_t requests = 0;
@@ -21,7 +23,8 @@ bool hide_skipped = false;
 enum Tasks{
     TASK_EXPLORE,
     TASK_EXPLORE_FILE_RAW,
-    TASK_SEARCH
+    TASK_SEARCH,
+    TASK_SCRIPT
 };
 
 int task;
@@ -50,6 +53,11 @@ int main(int argc, char *argv[]){
         if(std::string(argv[a]) == TAG_SEARCH){
             if(argc < a+1){exit(1);}
             task = Tasks::TASK_SEARCH;
+            task_argc = a;
+        }
+        if(std::string(argv[a]) == TAG_SCRIPT){
+            if(argc < a+1){exit(1);}
+            task = Tasks::TASK_SCRIPT;
             task_argc = a;
         }
         if(std::string(argv[a]) == "-j"){
@@ -113,6 +121,14 @@ int main(int argc, char *argv[]){
         task->decode_file(argv[task_argc+1]);
         task->run();
         task->write_raw_results();
+    }
+    else if(task == Tasks::TASK_SCRIPT){
+        lua_State* L = luaL_newstate();
+        l_register_netexplorer_api(L);
+        if(luaL_dofile(L, argv[task_argc+1])){
+            logger->log(lua_tostring(L, -1));
+        }
+        lua_close(L);
     }
 
     delete logger;

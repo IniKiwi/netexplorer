@@ -16,6 +16,8 @@
 #include "util.h"
 #include "protocolmap.h"
 
+#include "lua/lua.hpp"
+
 #define TAG_POPULAR "pop"
 #define TAG_RANDOM "rand"
 #define TAG_ALL "*"
@@ -36,6 +38,7 @@ typedef struct Ipv4Sub{
     uint8_t mode;
 } Ipv4Sub;
 
+#define IPV4ADDR_STR "Ipv4Addr"
 typedef struct Ipv4Addr{
     Ipv4Sub ip[4];
     uint16_t port;
@@ -135,6 +138,7 @@ typedef struct Task{
 class NetworkTaskThread;
 class Logger;
 
+#define NETWORKTASK_STR "NetworkTask"
 class NetworkTask{
     private:
     std::vector<NetworkTaskThread*> m_threads;
@@ -153,10 +157,14 @@ class NetworkTask{
     bool m_ended = false;
     size_t m_threads_num = 5;
     bool m_ok = false;
+    lua_State* m_lua_state = nullptr;
+    std::map<std::string, int> m_lua_protocol_callbacks;
 
     std::mutex lock;
     public:
-    NetworkTask(Logger* _logger, ProtocolMap* protocol_map): m_logger(_logger), m_protocol_map(protocol_map){}
+    NetworkTask(Logger* _logger, ProtocolMap* protocol_map, lua_State* L): m_logger(_logger), m_protocol_map(protocol_map), m_lua_state(L){}
+    NetworkTask(Logger* _logger, ProtocolMap* protocol_map): NetworkTask(_logger, protocol_map, nullptr){}
+
     int decode(std::string taskdata);
     int decode_file(std::string rawdata);
     int decode_ipv4(std::string rawdata, Task base);
@@ -184,6 +192,19 @@ class NetworkTask{
     void set_timeout(uint32_t _timeout){m_timeout = _timeout;}
     void set_threads_num(uint32_t _threads){m_threads_num = _threads;}
     void set_max_requests(uint32_t _requests){m_max_requests = _requests;}
+    void set_lua_protocol_callback(std::string protocol, int idx){
+        m_lua_protocol_callbacks[protocol] = idx;
+    }
+    int get_lua_protocol_callback(std::string protocol){
+        try{
+            return m_lua_protocol_callbacks.at(protocol);
+        }
+        catch(std::exception e){
+            
+        }
+        return 0;
+    }
+    lua_State* get_lua_state(){return m_lua_state;}
 
     Ipv4Addr get_next_ipv4();
 

@@ -12,6 +12,9 @@
 #include <sstream>
 #include <unistd.h>
 
+#include "../lua/lua.hpp"
+#include "../lapi.h"
+
 HttpRequestResult* http_get(int sockfd, Ipv4Addr addr, std::string path){
     char* req_buffer = (char*)std::malloc(MIN_BUFFER_SIZE);
     std::snprintf(req_buffer, MIN_BUFFER_SIZE, "GET %s HTTP/1.1\r\nHost: %s\r\n\r\n", path.c_str(), addr.get_host().c_str());
@@ -75,6 +78,18 @@ int http_action(Ipv4Addr addr, std::string path, NetworkTask* task){
             delete result;
             close(sockfd);
             return RequestStatus::FAIL;
+        }
+        int callback = task->get_lua_protocol_callback("http");
+        if(callback != 0){
+            std::mutex lock;
+            lock.lock();
+            lua_State* L = task->get_lua_state();
+            lua_rawgeti( L, LUA_REGISTRYINDEX, callback);
+            l_push_ipv4addr(L, &addr);
+            *reinterpret_cast<HttpRequestResult**>(lua_newuserdata(L, sizeof(HttpRequestResult*))) = result;
+            luaL_setmetatable(L, HTTPREQUESTRESULT_STR);
+            lua_pcall( L, 2, 0, 0 );
+            lock.unlock();
         }
         http_log(addr, path, task, result);
         delete result;

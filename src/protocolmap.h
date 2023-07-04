@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 
+#define PROTOCOLMAP_STR "ProtocolMap"
 class ProtocolMap{
     private:
     std::map<uint16_t,std::string> m_protocol_map;

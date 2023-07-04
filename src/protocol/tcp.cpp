@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include "../logger.h"
+#include "../lapi.h"
 
 int tcp_connect(Ipv4Addr addr, size_t timeout){
     std::string ip_str = addr.to_string_ip();
@@ -34,6 +35,16 @@ int tcp_action(Ipv4Addr addr, NetworkTask* task){
     addr.protocol = "tcp";
     int result = tcp_connect(addr, task->get_timeout());
     if(result != -1){
+        int callback = task->get_lua_protocol_callback("tcp");
+        if(callback != 0){
+            std::mutex lock;
+            lock.lock();
+            lua_State* L = task->get_lua_state();
+            lua_rawgeti( L, LUA_REGISTRYINDEX, callback);
+            l_push_ipv4addr(L, &addr);
+            lua_pcall( L, 1, 0, 0 );
+            lock.unlock();
+        }
         task->get_logger()->log_request(RequestStatus::OK, addr, "");
         task->push_raw_result(addr);
         close(result);

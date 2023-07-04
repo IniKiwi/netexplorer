@@ -10,6 +10,7 @@ enum HttpResultCode{
     HTTP_NET_ERR,
 };
 
+#define HTTPREQUESTRESULT_STR "HttpRequestResult"
 class HttpRequestResult{
     private:
     char* m_raw_data;

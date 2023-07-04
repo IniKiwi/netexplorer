@@ -22,6 +22,7 @@ enum RequestStatus{
     ACCESS_DENIED
 };
 
+#define LOGGER_STR "Logger"
 class Logger{
     private:
     std::mutex m_lock;
